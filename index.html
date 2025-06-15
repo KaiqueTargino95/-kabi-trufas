@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KABI Trufas</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #fff0f5, #ffe4e1);
+      margin: 0;
+      padding: 0;
+    }
+    header, footer {
+      background-color: #7b2e2e;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      text-align: center;
+    }
+    .hidden { display: none; }
+    .produto {
+      display: inline-block;
+      border: 1px solid #d2691e;
+      border-radius: 12px;
+      margin: 10px;
+      padding: 15px;
+      width: 160px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .produto:hover { transform: scale(1.05); }
+    .produto img {
+      width: 100px;
+      height: 100px;
+    }
+    button {
+      background-color: #8b4513;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    button:hover { background-color: #a0522d; }
+    #resumo {
+      background: #ffe4e1;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input {
+      padding: 10px;
+      margin: 10px 0;
+      width: 80%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<header><h1>Bem-vindo à KABI Trufas</h1></header>
+
+<div class="container">
+  <div id="login-container">
+    <p>Informe seus dados para iniciar o pedido:</p>
+    <input type="text" id="nome" placeholder="Seu nome" /><br />
+    <input type="tel" id="telefone" placeholder="Seu celular" /><br />
+    <button onclick="iniciarCompra()">Iniciar Compra</button>
+  </div>
+
+  <div id="loja-container" class="hidden">
+    <h2>Escolha suas trufas</h2>
+    <div id="produtos"></div>
+    <div id="resumo">
+      <p id="quantidade">Total de trufas: 0</p>
+      <p id="sabores">Sabores:</p>
+      <p id="total">Total: R$ 0.00</p>
+    </div>
+    <button onclick="enviarPedido()">Enviar Pedido</button>
+    <button onclick="voltarInicio()">Voltar ao Início</button>
+  </div>
+</div>
+
+<footer><p>&copy; 2025 KABI Trufas. Todos os direitos reservados.</p></footer>
+
+<script>
+const produtos = [
+  { nome: "Óreo", preco: 2.5 },
+  { nome: "Prestígio", preco: 2.5 },
+  { nome: "M & M", preco: 2.5 },
+  { nome: "2 Amores", preco: 2.5 },
+  { nome: "Leite Ninho", preco: 2.5 }
+];
+
+const carrinho = {};
+let nomeCliente = "";
+let telefoneCliente = "";
+
+function iniciarCompra() {
+  nomeCliente = document.getElementById("nome").value;
+  telefoneCliente = document.getElementById("telefone").value;
+  if (!nomeCliente || !telefoneCliente) {
+    alert("Por favor, preencha todos os campos.");
+    return;
+  }
+  document.getElementById("login-container").classList.add("hidden");
+  document.getElementById("loja-container").classList.remove("hidden");
+  montarProdutos();
+}
+
+function montarProdutos() {
+  const container = document.getElementById("produtos");
+  produtos.forEach(produto => {
+    carrinho[produto.nome] = 0;
+    const div = document.createElement("div");
+    div.className = "produto";
+    div.innerHTML = `
+      <img src="https://via.placeholder.com/100?text=${produto.nome}" alt="${produto.nome}" />
+      <h3>${produto.nome}</h3>
+      <p>R$ ${produto.preco.toFixed(2)}</p>
+      <button onclick="alterarQuantidade('${produto.nome}', -1)">-</button>
+      <span id="quant-${produto.nome}">0</span>
+      <button onclick="alterarQuantidade('${produto.nome}', 1)">+</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function alterarQuantidade(nome, delta) {
+  carrinho[nome] = Math.max(0, carrinho[nome] + delta);
+  document.getElementById("quant-" + nome).innerText = carrinho[nome];
+  atualizarResumo();
+}
+
+function atualizarResumo() {
+  let total = 0, qtd = 0, sabores = [];
+  produtos.forEach(p => {
+    const quant = carrinho[p.nome];
+    if (quant > 0) {
+      sabores.push(`${p.nome} (${quant})`);
+      total += quant * p.preco;
+      qtd += quant;
+    }
+  });
+  document.getElementById("quantidade").innerText = `Total de trufas: ${qtd}`;
+  document.getElementById("sabores").innerText = `Sabores: ${sabores.join(", ")}`;
+  document.getElementById("total").innerText = `Total: R$ ${total.toFixed(2)}`;
+}
+
+function enviarPedido() {
+  const totalTrufas = Object.values(carrinho).reduce((a, b) => a + b, 0);
+  const valorTotal = Object.entries(carrinho).reduce((acc, [sabor, qtd]) => {
+    const preco = produtos.find(p => p.nome === sabor).preco;
+    return acc + preco * qtd;
+  }, 0);
+  const pedido = Object.entries(carrinho).filter(([_, qtd]) => qtd > 0)
+    .map(([sabor, qtd]) => `${sabor} (${qtd})`).join(', ');
+
+  const dados = {
+    nome: nomeCliente,
+    telefone: telefoneCliente,
+    pedido: pedido,
+    totalTrufas: totalTrufas,
+    valorTotal: valorTotal.toFixed(2)
+  };
+
+  fetch('https://script.google.com/macros/s/AKfycbyIQ96alUh7vgvdnf_E21hzv_YcBsqW6GNWRhp0lgT7a8pSvEpB1OeKUsY0okRlZJjM/exec', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(() => { alert("Pedido enviado com sucesso!"); window.location.reload(); })
+  .catch(() => { alert("Erro ao enviar o pedido."); });
+}
+
+function voltarInicio() { window.location.reload(); }
+</script>
+
+</body>
+</html>
