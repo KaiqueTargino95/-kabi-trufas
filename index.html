@@ -103,7 +103,7 @@ function enviarPedido() {
 
   const dados = { nome: nomeCliente, telefone: telefoneCliente, pedido: pedido, totalTrufas: totalTrufas, valorTotal: valorTotal.toFixed(2) };
 
-  fetch('https://script.google.com/macros/s/AKfycbyIQ96alUh7vgvdnf_E21hzv_YcBsqW6GNWRhp0lgT7a8pSvEpB1OeKUsY0okRlZJjM/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyaOouxAZf4Q0OAPBgw6WT33KmYjURI36IxGjweSWmkp6a44R0WCaeLWJw8qrdUiWF0/exec', {
     method: 'POST',
     body: JSON.stringify(dados),
     headers: { 'Content-Type': 'application/json' }
